@@ -1,0 +1,11 @@
+# 排除大文件目录
+TensorRT-10.8.0/
+YOLOv8/
+testOpencv/
+
+# 排除子模块中的构建文件（根据需要添加）
+*/build/
+*/__pycache__/
+*.onnx
+*.dll
+*.so
