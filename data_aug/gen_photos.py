@@ -27,8 +27,8 @@ class ImagePasteApp(QMainWindow):
         self.foreground_folders = {
             0: "",  # cone
             1: "",  # box 
-            2: "",  # bucket 
-            3: ""   # rock
+            # 2: "",  # bucket 
+            # 3: ""   # rock
         }
         self.rois = []  # 存储用户划定的ROI区域 (x1, y1, x2, y2)
         self.drawing = False
@@ -68,26 +68,28 @@ class ImagePasteApp(QMainWindow):
         self.btn_load_folder = QPushButton("加载图片文件夹")
         self.btn_load_folder.clicked.connect(self.load_image_folder)
         
-        self.btn_load_foreground0 = QPushButton("加载cone前景文件夹")
+        self.btn_load_foreground0 = QPushButton("加载前景1文件夹")
         self.btn_load_foreground0.clicked.connect(lambda: self.load_foreground_folder(0))
 
-        self.btn_load_foreground1 = QPushButton("加载box前景文件夹")
+        self.btn_load_foreground1 = QPushButton("加载前景2文件夹")
         self.btn_load_foreground1.clicked.connect(lambda: self.load_foreground_folder(1))
 
-        self.btn_load_foreground2 = QPushButton("加载bucket前景文件夹")
-        self.btn_load_foreground2.clicked.connect(lambda: self.load_foreground_folder(2))
+        # self.btn_load_foreground2 = QPushButton("加载bucket前景文件夹")
+        # self.btn_load_foreground2.clicked.connect(lambda: self.load_foreground_folder(2))
 
-        self.btn_load_foreground3 = QPushButton("加载rock前景文件夹")
-        self.btn_load_foreground3.clicked.connect(lambda: self.load_foreground_folder(3))
+        # self.btn_load_foreground3 = QPushButton("加载rock前景文件夹")
+        # self.btn_load_foreground3.clicked.connect(lambda: self.load_foreground_folder(3))
         
         self.btn_set_output = QPushButton("设置输出文件夹")
         self.btn_set_output.clicked.connect(self.set_output_folder)
         
         self.class_combo = QComboBox()
-        self.class_combo.addItems(["cone (类别0)",
-                                "box (类别1)",
-                                "bucket (类别2)",
-                                "rock (类别3)"])
+        self.class_combo.addItems(["前景1 (类别0)",
+                                "前景2 (类别1)",
+                                # "bucket (类别2)",
+                                # "rock (类别3)"])
+                                ])
+        
         
         self.btn_add_roi = QPushButton("添加ROI")
         self.btn_add_roi.clicked.connect(self.add_roi)
@@ -124,8 +126,8 @@ class ImagePasteApp(QMainWindow):
         control_layout.addWidget(self.btn_load_folder)
         control_layout.addWidget(self.btn_load_foreground0)
         control_layout.addWidget(self.btn_load_foreground1)
-        control_layout.addWidget(self.btn_load_foreground2)
-        control_layout.addWidget(self.btn_load_foreground3)
+        # control_layout.addWidget(self.btn_load_foreground2)
+        # control_layout.addWidget(self.btn_load_foreground3)
         control_layout.addWidget(self.btn_set_output)
         control_layout.addWidget(self.class_combo)
         control_layout.addWidget(self.btn_add_roi)

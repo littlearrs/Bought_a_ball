@@ -1,3 +1,6 @@
+
+#  这个脚本有曝光
+
 import os
 # os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = os.path.dirname(PyQt5.__file__)
 import random
@@ -23,8 +26,8 @@ class ImagePasteApp(QMainWindow):
         self.current_image_index = 0
         self.image_paths = []
         self.foreground_folders = {
-            0: "",  # 流动商贩
-            0: ""   # 流动商贩
+            0: "",  # 映射到2 well
+            1: ""   # 映射到3 no_well
         }
         self.rois = []  # 存储用户划定的ROI区域 (x1, y1, x2, y2)
         self.drawing = False
@@ -61,20 +64,20 @@ class ImagePasteApp(QMainWindow):
         self.btn_load_folder = QPushButton("加载图片文件夹")
         self.btn_load_folder.clicked.connect(self.load_image_folder)
         
-        self.btn_load_foreground0 = QPushButton("加流动商贩前景文件夹")
+        self.btn_load_foreground0 = QPushButton("加载前景文件夹")
         self.btn_load_foreground0.clicked.connect(lambda: self.load_foreground_folder(0))
         
-        self.btn_load_foreground1 = QPushButton("加流动商贩前景文件夹")
+        self.btn_load_foreground1 = QPushButton("加载前景文件夹")
         self.btn_load_foreground1.clicked.connect(lambda: self.load_foreground_folder(1))
         
         self.btn_set_output = QPushButton("设置输出文件夹")
         self.btn_set_output.clicked.connect(self.set_output_folder)
         
         self.class_combo = QComboBox()
-        self.class_combo.addItems(["流动商贩 (类别0)", "流动商贩 (类别0)"])
+        self.class_combo.addItems(["类别0", "类别1"])
 
         self.class_combo = QComboBox()
-        self.class_combo.addItems(["流动商贩 (类别0)"])
+        self.class_combo.addItems(["类别0", "类别1"])
         
         
         self.btn_add_roi = QPushButton("添加ROI")
@@ -244,12 +247,16 @@ class ImagePasteApp(QMainWindow):
         self.modified_image = self.original_image.copy()
         self.pasted_labels = []  # 存储贴图的标签信息
         
+        # # 定义combo index -> YOLO class_id映射
+        # combo_to_class_id = {0: 2, 1: 3}
+
         for roi in self.rois:
             x1, y1, x2, y2 = roi
             width, height = x2 - x1, y2 - y1
             
             # 获取选择的类别
             class_id = self.class_combo.currentIndex()
+            # class_id = combo_to_class_id[combo_index]  # 映射到实际类别ID
             foreground_folder = self.foreground_folders[class_id]
             
             # 从前景文件夹随机选择一张图片
@@ -329,8 +336,12 @@ class ImagePasteApp(QMainWindow):
         
         # 生成唯一文件名
         base_name = os.path.splitext(os.path.basename(self.current_image_path))[0]
-        output_image_path = os.path.join(self.output_folder, "gen_photos", "images", f"{base_name}_aug.jpg")
-        output_label_path = os.path.join(self.output_folder, "gen_photos", "labels", f"{base_name}_aug.txt")
+        # output_image_path = os.path.join(self.output_folder, "gen_photos", "images", f"{base_name}_aug.jpg")
+        # output_label_path = os.path.join(self.output_folder, "gen_photos", "labels", f"{base_name}_aug.txt")
+
+        # 无目标的原始图片贴图
+        output_image_path = os.path.join(self.output_folder, "gen_photos", "images", f"{base_name}.jpg")
+        output_label_path = os.path.join(self.output_folder, "gen_photos", "labels", f"{base_name}.txt")
         
         # 保存图像
         cv2.imwrite(output_image_path, self.modified_image)
