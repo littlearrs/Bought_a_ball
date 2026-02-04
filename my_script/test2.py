@@ -1,26 +1,54 @@
-
 import os
-import json
 
-# JSON 文件夹路径
-json_dir = r"E:\object_detection_dataset\well_data\set_6_labels"
+def remove_empty_lines_from_txt(folder):
+    for filename in os.listdir(folder):
+        if filename.lower().endswith(".txt"):
+            file_path = os.path.join(folder, filename)
 
-# 遍历文件夹下所有 JSON 文件
-for fname in os.listdir(json_dir):
-    if fname.endswith(".json"):
-        json_path = os.path.join(json_dir, fname)
-        base_name = os.path.splitext(fname)[0]
-        img_file = base_name + ".jpg"  # 对应图片名
+            with open(file_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
 
-        # 打开 JSON 文件
-        with open(json_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            # 去掉空行：strip() 后为空串的行视为空行
+            new_lines = [line for line in lines if line.strip() != ""]
 
-        # 修改 imagePath
-        data["imagePath"] = img_file
+            # 如果文件内容有变化则写回
+            if new_lines != lines:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.writelines(new_lines)
+                print(f"✔ Cleaned empty lines: {filename}")
+            else:
+                print(f"✓ No empty lines: {filename}")
 
-        # 保存修改后的 JSON
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+if __name__ == "__main__":
+    folder_path = r"E:\roadbarries\labels\train"   # 修改为你的文件夹路径
+    remove_empty_lines_from_txt(folder_path)
 
-        print(f"✅ Updated {json_path} -> {img_file}")
+
+
+# import os
+
+# # 指定你的文件夹路径
+# folder = r"E:\object_detection_dataset\excavator_data\output\gen_photos\labels"
+
+# # 遍历文件夹下所有txt文件
+# for filename in os.listdir(folder):
+#     if filename.lower().endswith(".txt"):
+#         file_path = os.path.join(folder, filename)
+        
+#         # 读取原文件内容
+#         with open(file_path, "r", encoding="utf-8") as f:
+#             lines = f.readlines()
+        
+#         # 修改标签
+#         new_lines = []
+#         for line in lines:
+#             parts = line.strip().split()
+#             if parts and parts[0] == "0":
+#                 parts[0] = "1"
+#             new_lines.append(" ".join(parts))
+        
+#         # 写回文件
+#         with open(file_path, "w", encoding="utf-8") as f:
+#             f.write("\n".join(new_lines) + "\n")
+
+# print("已将所有txt文件中的标签0改为1。")

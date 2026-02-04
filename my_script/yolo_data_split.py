@@ -1,10 +1,9 @@
 import os
 import shutil
-import random
 from tqdm import tqdm
 
 
-def split_img(img_path, label_path, save_root, split_list, mode="random"):
+def split_img(img_path, label_path, save_root, split_list, mode="cluster"):
     """
     将图像和标签按比例划分为 train / val
 
@@ -12,10 +11,11 @@ def split_img(img_path, label_path, save_root, split_list, mode="random"):
         img_path: 图片目录
         label_path: 标签目录
         save_root: 数据保存根目录 (比如 E:/dataset/well_split)
-        split_list: [train比例, val比例]
-        mode: 划分方式 ("random" 随机 / "sequential" 顺序)
+        split_list: [train比例, val比例]  
+        mode: 划分方式 ("random" 随机 / "sequential" 顺序 / "cluster" 簇划分)
     """
     # 输出目录
+    print("mode:", mode)
     train_img_dir = os.path.join(save_root, 'images/train')
     val_img_dir = os.path.join(save_root, 'images/val')
     train_label_dir = os.path.join(save_root, 'labels/train')
@@ -26,44 +26,51 @@ def split_img(img_path, label_path, save_root, split_list, mode="random"):
     os.makedirs(val_img_dir, exist_ok=True)
     os.makedirs(val_label_dir, exist_ok=True)
 
-    train_ratio, val_ratio = split_list
     all_img = [f for f in os.listdir(img_path) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
     all_img.sort()  # 顺序保证一致
-
     all_img_path = [os.path.join(img_path, img) for img in all_img]
     total_num = len(all_img_path)
-    train_num = int(train_ratio * total_num)
 
-    # 选择划分方式
+    train_ratio, val_ratio = split_list
+
     if mode == "random":
+        import random
+        train_num = int(train_ratio * total_num)
         train_img = random.sample(all_img_path, train_num)
-    elif mode == "sequential":
-        train_img = all_img_path[:train_num]
-    else:
-        raise ValueError("mode must be 'random' or 'sequential'")
-
-    # 训练集
-    train_label = [toLabelPath(img, label_path) for img in train_img]
-    train_img_copy = [os.path.join(train_img_dir, os.path.basename(img)) for img in train_img]
-    train_label_copy = [os.path.join(train_label_dir, os.path.basename(label)) for label in train_label]
-
-    for i in tqdm(range(len(train_img)), desc='train ', ncols=80, unit='img'):
-        _copy(train_img[i], train_img_copy[i])
-        _copy(train_label[i], train_label_copy[i])
-
-    # 验证集
-    if mode == "random":
         val_img = list(set(all_img_path) - set(train_img))
-    else:  # sequential
+
+    elif mode == "sequential":
+        train_num = int(train_ratio * total_num)
+        train_img = all_img_path[:train_num]
         val_img = all_img_path[train_num:]
 
-    val_label = [toLabelPath(img, label_path) for img in val_img]
-    val_img_copy = [os.path.join(val_img_dir, os.path.basename(img)) for img in val_img]
-    val_label_copy = [os.path.join(val_label_dir, os.path.basename(label)) for label in val_label]
+    elif mode == "cluster":
+        cluster_size = 10  # 每簇固定大小
+        train_img, val_img = [], []
+        for i in range(0, total_num, cluster_size):
+            cluster = all_img_path[i:i + cluster_size]
+            if len(cluster) < cluster_size:  # 不够一簇 → 全部给训练集
+                train_img.extend(cluster)
+            else:
+                k = int(train_ratio * cluster_size)
+                train_img.extend(cluster[:k])
+                val_img.extend(cluster[k:])
+    else:
+        raise ValueError("mode must be 'random', 'sequential' or 'cluster'")
 
-    for i in tqdm(range(len(val_img)), desc='val ', ncols=80, unit='img'):
-        _copy(val_img[i], val_img_copy[i])
-        _copy(val_label[i], val_label_copy[i])
+    # ========= 拷贝 =========
+    _copy_dataset(train_img, label_path, train_img_dir, train_label_dir, desc="train")
+    _copy_dataset(val_img, label_path, val_img_dir, val_label_dir, desc="val")
+
+
+def _copy_dataset(img_list, label_path, img_dir, label_dir, desc="train"):
+    labels = [toLabelPath(img, label_path) for img in img_list]
+    img_copy = [os.path.join(img_dir, os.path.basename(img)) for img in img_list]
+    label_copy = [os.path.join(label_dir, os.path.basename(label)) for label in labels]
+
+    for i in tqdm(range(len(img_list)), desc=desc, ncols=80, unit='img'):
+        _copy(img_list[i], img_copy[i])
+        _copy(labels[i], label_copy[i])
 
 
 def _copy(from_path, to_path):
@@ -80,8 +87,9 @@ def toLabelPath(img_path, label_path):
 
 
 if __name__ == '__main__':
-    img_path = r'E:\object_detection_dataset\well_data\well_data2_yolo\set_7_labels_yolo\images'
-    label_path = r'E:\object_detection_dataset\well_data\well_data2_yolo\set_7_labels_yolo\labels'
-    save_root = r'E:\object_detection_dataset\well_data\well_data2_yolo\well_random2'  # 输出路径可以自定义
-    split_list = [0.9, 0.1]  # [train:val]
-    split_img(img_path, label_path, save_root, split_list, mode="random")
+    img_path = r'D:\artifical\Baggages\images'
+    label_path = r'D:\artifical\Baggages\labels'
+    save_root = r'D:\artifical\Baggages\airport_xray'
+    split_list = [0.8, 0.2]  # [train:val]
+    split_img(img_path, label_path, save_root, split_list, mode="cluster")
+

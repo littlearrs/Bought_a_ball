@@ -87,7 +87,7 @@ def save_classes_txt(label2id, output_dir):
     print(f"✅ classes.txt 已生成: {classes_txt}")
 
 if __name__ == "__main__":
-    folder = r"E:\object_detection_dataset\well_data\well_data2_json\set_7_labels_json"
+    folder = r"E:\object_detection_dataset\well_data\well_data4_yolo\set_negative"
 
     json_files = glob(os.path.join(folder, "**", "*.json"), recursive=True)
     if not json_files:
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         exit(0)
 
     # ---- 这里可以自定义 class_id ----
-    custom_map = {"well": 0, "no_well": 1, "s_well": 2}  # 自定义映射
+    custom_map = {"well": 0, "s_well": 2}  # 自定义映射
     # custom_map = None  # 不使用自定义，则自动生成
 
 
